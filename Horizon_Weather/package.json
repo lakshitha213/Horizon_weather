@@ -11,7 +11,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.4",
     "axios": "^1.8.4",
-    "expo": "~52.0.40",
+    "expo": "^52.0.41",
     "expo-status-bar": "~2.0.1",
     "lodash": "^4.17.21",
     "react": "18.3.1",
