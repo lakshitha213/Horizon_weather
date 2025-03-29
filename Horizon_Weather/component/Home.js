@@ -1,19 +1,29 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet,TouchableWithoutFeedback,Keyboard } from 'react-native';
+import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import SearchBar from './SearchBar';
+import WeatherPage from './CurrentWeather';  // Assuming you have a WeatherPage component
 
 const Home = () => {
+  const [search, setSearch] = useState('');  // This is the state for search input
+  const [selectedCity, setSelectedCity] = useState(null);  // Store the selected city
 
-    const[search, setSearch] = useState('');
+  // Function to handle city selection and pass it to WeatherPage
+  const handleCitySelect = (cityName) => {
+    setSearch(cityName);  // Set city name in the search bar
+    setSelectedCity(cityName); // Set selected city for weather update
+  };
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-    <View style={styles.container}>
-      <Text style={styles.title}>Horizon Weather</Text>
+      <View style={styles.container}>
+        <Text style={styles.title}>Horizon Weather</Text>
 
-      <SearchBar value={search} onChangeText={(text)=> setSearch(text)}/>
+        {/* Pass the handleCitySelect function to SearchBar to update the selected city */}
+        <SearchBar value={search} onChangeText={(text) => setSearch(text)} onCitySelect={handleCitySelect} />
 
-    </View>
+        {/* If a city is selected, show weather data */}
+        {selectedCity && <WeatherPage city={selectedCity} />}
+      </View>
     </TouchableWithoutFeedback>
   );
 };
