@@ -45,6 +45,10 @@ const CurrentWeather = ({ city }) => {
             source={{ uri: `https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png` }}
             style={styles.icon}
           />
+          <Text style={styles.feel}>Feels like :- {Math.round(weatherData.main.feels_like)}°C</Text>
+          <Text style={styles.humidity}>Humidity :- {Math.round(weatherData.main.humidity)}%</Text>
+          <Text style={styles.wind}>Wind Speed :- {Math.round(weatherData.wind.speed)}m/s</Text>
+          <Text style={styles.wind}>Pressure :- {Math.round(weatherData.main.pressure)} hPa</Text>
         </View>
       )}
     </View>
