@@ -5,8 +5,8 @@ import Home from './component/Home';
 export default function App() {
   return (
     <View style={styles.container}>
-    <Home/>
-      <StatusBar style="auto" />e
+      <StatusBar style="auto" />
+      <Home/>
     </View>
   );
 }

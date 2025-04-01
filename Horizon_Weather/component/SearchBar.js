@@ -57,136 +57,109 @@ const SearchBar = ({ value, onChangeText, onCitySelect }) => {
       {error && <Text style={styles.errorText}>{error}</Text>}
 
       {cities.length > 0 && (
-        <FlatList
-          data={cities}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.item}
-              onPress={() => {
-                const cityName = `${item.name}, ${item.countryCode}`;
-                onChangeText(cityName);
-                onCitySelect(item.name); // This is the crucial line
-                setCities([]);
-                Keyboard.dismiss();
-              }}
-            >
-              <Text>{item.name}, {item.country}</Text>
-            </TouchableOpacity>
-          )}
-        />
+        <View style={styles.listContainer}>
+          <FlatList
+            data={cities}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.item}
+                onPress={() => {
+                  const cityName = `${item.name}, ${item.countryCode}`;
+                  onChangeText(cityName);
+                  onCitySelect(item.name);
+                  setCities([]);
+                  Keyboard.dismiss();
+                }}
+              >
+                <Text style={styles.itemText}>
+                  {item.name}, {item.country}
+                </Text>
+                <Ionicons name="location-outline" size={18} color="#666" />
+              </TouchableOpacity>
+            )}
+            keyboardShouldPersistTaps="handled"
+          />
+        </View>
       )}
     </View>
   );
 };
 
-// ... keep the same styles ...
-
-
 const styles = StyleSheet.create({
-
-  container: { padding: 10 },
-
-
-
-  searchContainer: {
-
-    flexDirection: 'row',
-
-    alignItems: 'center',
-
-    backgroundColor: 'gray',
-
-    borderRadius: 20,
-
-    borderWidth: 2,
-
-    borderColor: '#ddd',
-
-    paddingHorizontal: 15,
-
-    marginTop: 100,
-
-    shadowColor: 'black',
-
-    shadowOffset: { width: 0, height: 5 },
-
-    shadowOpacity: 0.5,
-
-    shadowRadius: 4,
-
-    elevation: 10,
-
-  },
-
-
-
-  input: {
-
-    flex: 1,
-
-    height: 50,
-
-    width:100,
-
-    color: 'black',
-
-    fontSize: 16,
-
-  },
-
-
-
-  iconContainer: {
-
-    padding: 10, // Makes the icon easier to click
-
-  },
-
-
-
-  item: {
-
+  container: {
     padding: 10,
-
-    paddingHorizontal: 20,
-
-    borderBottomWidth: 1,
-
+    position: 'relative',
+    zIndex: 1000,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'gray',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    paddingHorizontal: 15,
+    marginTop: 100,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    height: 50,
+  },
+  input: {
+    flex: 1,
+    height: '100%',
+    color: 'black',  // Black text color for search input
+    fontSize: 16,
+  },
+  iconContainer: {
+    padding: 8,
+  },
+  listContainer: {
+    position: 'absolute',
+    top: 80,
+    left: 10,
+    right: 10,
     backgroundColor: 'white',
-
+    marginTop:90,
     borderRadius: 10,
-
-    marginVertical: 0.5,
-
+    maxHeight: 300,
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
-
-
-
+  item: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  itemText: {
+    fontSize: 16,
+    color: '#000',
+  },
   loadingText: {
-
     color: 'black',
-
     textAlign: 'center',
-
-    marginVertical: 5,
-
+    padding: 15,
+    fontSize: 16,
   },
-
-
-
   errorText: {
-
-    color: 'red',
-
+    color: '#ff4444',
     textAlign: 'center',
-
-    marginVertical: 5,
-
+    padding: 15,
+    fontSize: 16,
+    fontWeight: '500',
   },
-
 });
-
-
 
 export default SearchBar;
