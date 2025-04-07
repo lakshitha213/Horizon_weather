@@ -1,15 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, Animated, Easing } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Location from 'expo-location';
 import SearchBar from './SearchBar';
 import CurrentWeather from './CurrentWeather';
 import axios from 'axios';
+import LoadingSpinner from './LodingSpinner';
+import AnimatedPreloader from './AnimatedPreloader';
+import { StatusBar } from 'expo-status-bar';
 
 const Home = () => {
   const [search, setSearch] = useState('');
-  const [selectedCity, setSelectedCity] = useState('London');
+  const [selectedCity, setSelectedCity] = useState(null);
   const [currentWeather, setCurrentWeather] = useState('default');
   const [nextWeather, setNextWeather] = useState(null);
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const apiKey = 'c1347ee59c0c794deef2405e7fd251eb';
 
@@ -24,14 +32,80 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetchDefaultWeather();
+    const loadingTimeout = setTimeout(() => {
+      setIsLoading(false);
+      setIsLoadingLocation(false);
+    }, 2000); // 2 seconds timeout
+
+    (async () => {
+      setIsLoadingLocation(true);
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        fetchDefaultWeather();
+        setIsLoadingLocation(false);
+        return;
+      }
+
+      try {
+        let location = await Location.getCurrentPositionAsync({});
+        setLocation(location);
+        await fetchWeatherByCoords(location.coords.latitude, location.coords.longitude);
+      } catch (error) {
+        console.error('Error getting location:', error);
+        setErrorMsg('Could not get your location');
+        fetchDefaultWeather();
+      }
+      setIsLoadingLocation(false);
+    })();
+
+    return () => clearTimeout(loadingTimeout);
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      setIsLoadingLocation(true);
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        fetchDefaultWeather();
+        setIsLoadingLocation(false);
+        return;
+      }
+
+      try {
+        let location = await Location.getCurrentPositionAsync({});
+        setLocation(location);
+        await fetchWeatherByCoords(location.coords.latitude, location.coords.longitude);
+      } catch (error) {
+        console.error('Error getting location:', error);
+        setErrorMsg('Could not get your location');
+        fetchDefaultWeather();
+      }
+      setIsLoadingLocation(false);
+    })();
+  }, []);
+
+  const fetchWeatherByCoords = async (lat, lon) => {
+    try {
+      const response = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
+      );
+      setSelectedCity(response.data.name);
+      const weatherMain = response.data.weather[0].main.toLowerCase();
+      startBackgroundTransition(weatherMain);
+    } catch (error) {
+      console.error('Error fetching weather by coordinates:', error);
+      fetchDefaultWeather();
+    }
+  };
 
   const fetchDefaultWeather = async () => {
     try {
       const response = await axios.get(
         `https://api.openweathermap.org/data/2.5/weather?q=London&appid=${apiKey}&units=metric`
       );
+      setSelectedCity(response.data.name);
       const weatherMain = response.data.weather[0].main.toLowerCase();
       startBackgroundTransition(weatherMain);
     } catch (error) {
@@ -56,6 +130,7 @@ const Home = () => {
   };
 
   const handleCitySelect = async (cityName) => {
+    setIsLoading(true); // Set loading state when fetching new city data
     setSelectedCity(cityName);
     Keyboard.dismiss();
     
@@ -68,6 +143,8 @@ const Home = () => {
     } catch (error) {
       console.error('Error fetching weather:', error);
       startBackgroundTransition('default');
+    } finally {
+      setIsLoading(false); // Always turn off loading when done
     }
   };
 
@@ -77,43 +154,63 @@ const Home = () => {
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
-        {/* Current background (static) */}
-        <LinearGradient
-          colors={currentGradient.colors}
-          style={styles.background}
-          start={currentGradient.start}
-          end={currentGradient.end}
-        />
+        <StatusBar translucent backgroundColor="transparent" />
         
-        {/* Transition background (animated) */}
-        {nextGradient && (
-          <Animated.View style={[styles.background, {
-            opacity: fadeAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [1, 0]
-            })
-          }]}>
+        {/* Full-screen preloader */}
+        {(isLoadingLocation || isLoading) && (
+          <View style={styles.absoluteFill}>
             <LinearGradient
-              colors={nextGradient.colors}
+              colors={['#4c669f', '#3b5998', '#192f6a']}
               style={styles.background}
-              start={nextGradient.start}
-              end={nextGradient.end}
-            />
-          </Animated.View>
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+            <AnimatedPreloader />
+            </LinearGradient>
+          </View>
         )}
         
-        {/* Content */}
-        <View style={styles.content}>
-          <Text style={styles.title}>Horizon Weather</Text>
-          
-          <SearchBar 
-            value={search}
-            onChangeText={setSearch}
-            onCitySelect={handleCitySelect}
-          />
-          
-          {selectedCity && <CurrentWeather city={selectedCity} />}
-        </View>
+        {/* Main content */}
+        {!(isLoadingLocation || isLoading) && (
+          <>
+            <LinearGradient
+              colors={currentGradient.colors}
+              style={styles.background}
+              start={currentGradient.start}
+              end={currentGradient.end}
+            />
+            
+            {nextGradient && (
+              <Animated.View style={[styles.background, {
+                opacity: fadeAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [1, 0]
+                })
+              }]}>
+                <LinearGradient
+                  colors={nextGradient.colors}
+                  style={styles.background}
+                  start={nextGradient.start}
+                  end={nextGradient.end}
+                />
+              </Animated.View>
+            )}
+            
+            <View style={styles.content}>
+              <Text style={styles.title}>Horizon Weather</Text>
+              
+              {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
+              
+              <SearchBar 
+                value={search}
+                onChangeText={setSearch}
+                onCitySelect={handleCitySelect}
+              />
+              
+              <CurrentWeather city={selectedCity} />
+            </View>
+          </>
+        )}
       </View>
     </TouchableWithoutFeedback>
   );
@@ -148,6 +245,31 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
+  },
+  errorText: {
+    color: '#ff4444',
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 50,
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 18,
+  },
+  absoluteFill: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
 });
 
