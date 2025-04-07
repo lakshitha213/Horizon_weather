@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, FlatList, Text, TouchableOpacity, StyleSheet, Keyboard } from 'react-native';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
+import LoadingSpinner from './LodingSpinner';
 
 const SearchBar = ({ value, onChangeText, onCitySelect }) => {
   const [cities, setCities] = useState([]);
@@ -49,7 +50,11 @@ const SearchBar = ({ value, onChangeText, onCitySelect }) => {
           onChangeText={onChangeText}
         />
         <TouchableOpacity onPress={fetchCities} style={styles.iconContainer}>
-          <Ionicons name="search" size={24} color="black" />
+        {loading ? (
+            <ActivityIndicator size="small" color="#000" />
+          ) : (
+            <Ionicons name="search" size={24} color="black" />
+          )}
         </TouchableOpacity>
       </View>
 

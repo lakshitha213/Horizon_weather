@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import LoadingSpinner from './LodingSpinner';
 
 const CurrentWeather = ({ city }) => {
   // Initialize all state variables properly
@@ -32,6 +33,15 @@ const CurrentWeather = ({ city }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  if (!city) {
+    return (
+      <View style={[styles.container,{justifyContent:'center'}]}>
+        <LoadingSpinner/>
+        <Text style={styles.loadingText}>...</Text>
+      </View>
+    );
   };
 
   return (
