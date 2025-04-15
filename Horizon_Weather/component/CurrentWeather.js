@@ -27,9 +27,11 @@ const CurrentWeather = ({ city }) => {
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
       );
       setWeatherData(response.data);
-    } catch (err) {
-      setError('Could not fetch weather data. Please try another city.');
-      setWeatherData(null);
+    } catch (error) {
+      if (error.response?.status === 404) {
+        console.error('Weather endpoint not found - check your URL');
+      }
+      throw error;
     } finally {
       setIsLoading(false);
     }

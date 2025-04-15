@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import Home from './component/Home';
+import Forecast from './component/Forecast';
 
 export default function App() {
   return (

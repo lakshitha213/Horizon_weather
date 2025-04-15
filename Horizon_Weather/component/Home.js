@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, Animated, Easing, ScrollView, SafeAreaView, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
 import SearchBar from './SearchBar';
@@ -8,6 +8,7 @@ import axios from 'axios';
 import LoadingSpinner from './LodingSpinner';
 import AnimatedPreloader from './AnimatedPreloader';
 import { StatusBar } from 'expo-status-bar';
+import Forecast from './Forecast';
 
 const Home = () => {
   const [search, setSearch] = useState('');
@@ -18,6 +19,7 @@ const Home = () => {
   const [errorMsg, setErrorMsg] = useState(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [forecastData, setForecastData] = useState(null);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const apiKey = 'c1347ee59c0c794deef2405e7fd251eb';
 
@@ -30,6 +32,17 @@ const Home = () => {
     drizzle: { colors: ['#4B79A1', '#283E51'], start: { x: 0, y: 0 }, end: { x: 1, y: 1 } },
     default: { colors: ['#4c669f', '#3b5998', '#192f6a'], start: { x: 0, y: 0 }, end: { x: 1, y: 1 } }
   };
+
+  const fetcForecast = async (lat, lon) => {
+    try{
+      const response = await axios.get(
+        `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
+      );
+      setForecastData(response.data); 
+    }catch (error){
+      console.error('Error fetching forecast:',error);
+    }
+  }
 
   useEffect(() => {
     const loadingTimeout = setTimeout(() => {
@@ -62,29 +75,7 @@ const Home = () => {
     return () => clearTimeout(loadingTimeout);
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      setIsLoadingLocation(true);
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        fetchDefaultWeather();
-        setIsLoadingLocation(false);
-        return;
-      }
-
-      try {
-        let location = await Location.getCurrentPositionAsync({});
-        setLocation(location);
-        await fetchWeatherByCoords(location.coords.latitude, location.coords.longitude);
-      } catch (error) {
-        console.error('Error getting location:', error);
-        setErrorMsg('Could not get your location');
-        fetchDefaultWeather();
-      }
-      setIsLoadingLocation(false);
-    })();
-  }, []);
+  
 
   const fetchWeatherByCoords = async (lat, lon) => {
     try {
@@ -108,6 +99,10 @@ const Home = () => {
       setSelectedCity(response.data.name);
       const weatherMain = response.data.weather[0].main.toLowerCase();
       startBackgroundTransition(weatherMain);
+      const forecastResponse = await axios.get(
+        `https://api.openweathermap.org/data/2.5/forecast?q=London&appid=${apiKey}&units=metric`
+      )
+      setForecastData(forecastResponse.data);
     } catch (error) {
       console.error('Error fetching default weather:', error);
       startBackgroundTransition('default');
@@ -140,6 +135,11 @@ const Home = () => {
       );
       const weatherMain = response.data.weather[0].main.toLowerCase();
       startBackgroundTransition(weatherMain);
+
+      const forecastResponse =await axios.get(
+        `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${apiKey}&units=metric`
+      );
+      setForecastData(forecastResponse.data);
     } catch (error) {
       console.error('Error fetching weather:', error);
       startBackgroundTransition('default');
@@ -154,6 +154,7 @@ const Home = () => {
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
+      
         <StatusBar translucent backgroundColor="transparent" />
         
         {/* Full-screen preloader */}
@@ -196,6 +197,11 @@ const Home = () => {
               </Animated.View>
             )}
             
+            <ScrollView 
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
             <View style={styles.content}>
               <Text style={styles.title}>Horizon Weather</Text>
               
@@ -208,9 +214,14 @@ const Home = () => {
               />
               
               <CurrentWeather city={selectedCity} />
+              <Forecast forecastData={forecastData} />
+
+              <View style={{ height: 20 }} />
             </View>
+            </ScrollView>
           </>
         )}
+      
       </View>
     </TouchableWithoutFeedback>
   );
@@ -222,6 +233,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
+  
   background: {
     position: 'absolute',
     left: 0,

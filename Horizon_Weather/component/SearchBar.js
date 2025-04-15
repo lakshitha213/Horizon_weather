@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, FlatList, Text, TouchableOpacity, StyleSheet, Keyboard } from 'react-native';
+import { View, TextInput, FlatList, Text, TouchableOpacity, StyleSheet, Keyboard, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import LoadingSpinner from './LodingSpinner';
@@ -32,9 +32,13 @@ const SearchBar = ({ value, onChangeText, onCitySelect }) => {
         }
       );
       setCities(response.data.data);
-    } catch (err) {
-      console.error('Error fetching cities:', err);
-      setError('Too many requests. Please try again later.');
+    } catch (error) {
+      if (error.response?.status === 429) {
+        // Wait 1 second and try again
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return fetchCities();
+      }
+      throw error;
     }
     setLoading(false);
   };
