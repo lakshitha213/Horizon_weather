@@ -7,9 +7,9 @@ const Forecast = ({ forecastData }) => {
 
   // Group forecast by day (one entry per day)
   const dailyForecasts = [];
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat','Sun'];
   
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 8; i++) {
     const forecastIndex = i * 8; // Get noon forecast (3hr intervals, 8 per day)
     if (forecastIndex < forecastData.list.length) {
       const forecast = forecastData.list[forecastIndex];
@@ -25,7 +25,7 @@ const Forecast = ({ forecastData }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>5-Day Forecast</Text>
+      <Text style={styles.title}>Weekly Forecast</Text>
       
       {dailyForecasts.map((day, index) => (
         <View key={index} style={styles.forecastItem}>

@@ -28,10 +28,8 @@ const CurrentWeather = ({ city }) => {
       );
       setWeatherData(response.data);
     } catch (error) {
-      if (error.response?.status === 404) {
-        console.error('Weather endpoint not found - check your URL');
-      }
-      throw error;
+      console.error('Error fetching weather:', error);
+      setError('Failed to fetch weather data');
     } finally {
       setIsLoading(false);
     }
@@ -64,19 +62,19 @@ const CurrentWeather = ({ city }) => {
           
           <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
-              <MaterialCommunityIcons name="temperature-celsius" size={22} color="#ff8c00" style={styles.iconStyle} />
+              <MaterialCommunityIcons name="thermometer" size={24} color="#ff8c00" style={styles.iconStyle} />
               <Text style={styles.detailText}>Feels like: {Math.round(weatherData.main.feels_like)}°C</Text>
             </View>
             <View style={styles.detailRow}>
-              <MaterialCommunityIcons name="water" size={22} color="#1E90FF" style={styles.iconStyle} />
+              <MaterialCommunityIcons name="water" size={24} color="#1E90FF" style={styles.iconStyle} />
               <Text style={styles.detailText}>Humidity: {Math.round(weatherData.main.humidity)}%</Text>
             </View>
             <View style={styles.detailRow}>
-              <MaterialCommunityIcons name="weather-windy" size={22} color="#4682B4" style={styles.iconStyle} />
-              <Text style={styles.detailText}>Wind:        {Math.round(weatherData.wind.speed)} m/s</Text>
+              <MaterialCommunityIcons name="weather-windy" size={24} color="#4682B4" style={styles.iconStyle} />
+              <Text style={styles.detailText}>Wind: {Math.round(weatherData.wind.speed)} m/s</Text>
             </View>
             <View style={styles.detailRow}>
-              <MaterialCommunityIcons name="gauge" size={22} color="#696969" style={styles.iconStyle} />
+              <MaterialCommunityIcons name="gauge" size={24} color="#696969" style={styles.iconStyle} />
               <Text style={styles.detailText}>Pressure: {Math.round(weatherData.main.pressure)} hPa</Text>
             </View>
           </View>
