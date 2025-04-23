@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, ActivityIndicator, Animated } from 'react-native';
 import axios from 'axios';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import LoadingSpinner from './LodingSpinner';
 
-const CurrentWeather = ({ city }) => {
+const CurrentWeather = ({ city, isDayTime }) => {
   // Initialize all state variables properly
   const [weatherData, setWeatherData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false); // Renamed to be more descriptive
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const moonAnim = new Animated.Value(0);
 
   const apiKey = 'c1347ee59c0c794deef2405e7fd251eb';
   
@@ -18,6 +19,22 @@ const CurrentWeather = ({ city }) => {
       fetchWeather(city);
     }
   }, [city]);
+
+  useEffect(() => {
+    if (!isDayTime) {
+      moonAnim.setValue(0);
+      Animated.sequence([
+        Animated.delay(500),
+        Animated.timing(moonAnim, {
+          toValue: 1,
+          duration: 5000,
+          useNativeDriver: true,
+        })
+      ]).start();
+    } else {
+      moonAnim.setValue(0);
+    }
+  }, [isDayTime]);
 
   const fetchWeather = async (city) => {
     setIsLoading(true);
@@ -51,7 +68,50 @@ const CurrentWeather = ({ city }) => {
       {weatherData && (
         <View style={styles.weatherInfo}>
           <Text style={styles.cityName}>{weatherData.name}</Text>
-          <Text style={styles.temp}>{Math.round(weatherData.main.temp)}°C</Text>
+          
+          <View style={styles.tempContainer}>
+            <View style={styles.illustrationContainer}>
+              {isDayTime ? (
+                <Image
+                  source={require('../assets/sun.png')}
+                  style={styles.sun}
+                />
+              ) : (
+                <>
+                  <Animated.View
+                    style={[
+                      styles.moonContainer,
+                      {
+                        transform: [
+                          {
+                            translateY: moonAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [200, 0]
+                            })
+                          }
+                        ],
+                        opacity: moonAnim.interpolate({
+                          inputRange: [0, 0.5, 1],
+                          outputRange: [0, 0.8, 1]
+                        })
+                      }
+                    ]}
+                  >
+                    <Image
+                      source={require('../assets/moon.png')}
+                      style={styles.moon}
+                    />
+                  </Animated.View>
+                  <Image
+                    source={require('../assets/tent.png')}
+                    style={styles.tent}
+                  />
+                </>
+              )}
+            </View>
+            <Text style={styles.temp}>{Math.round(weatherData.main.temp)}°C</Text>
+          </View>
+
           <Text style={styles.description}>
             {weatherData.weather[0].description}
           </Text>
@@ -107,17 +167,58 @@ const styles = StyleSheet.create({
   },
   weatherInfo: {
     alignItems: 'center',
-    width: '90%',
+    width: '100%',
   },
   cityName: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 15,
+    textAlign: 'center',
+    width: '100%',
+  },
+  tempContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 15,
+    width: '100%',
+  },
+  illustrationContainer: {
+    width: 100,
+    height: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 20,
+  },
+  sun: {
+    width: 80,
+    height: 80,
+    zIndex: 1,
+  },
+  moonContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 0,
+  },
+  moon: {
+    width: 60,
+    height: 60,
+    zIndex: 0,
+  },
+  tent: {
+    width: 80,
+    height: 60,
+    position: 'absolute',
+    bottom: 0,
+    zIndex: 2,
   },
   temp: {
     fontSize: 50,
     color: '#ff8c00',
-    marginBottom: 5,
+    fontWeight: 'bold',
   },
   description: {
     fontSize: 18,

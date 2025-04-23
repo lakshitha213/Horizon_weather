@@ -381,7 +381,7 @@ const Home = () => {
                 <View style={styles.chartBackground}>
                   {data.temperatures.map((temp, index) => {
                     const heightPercentage = ((temp - data.lowestTemp) / data.tempRange) * 100;
-                    return (
+  return (
                       <View 
                         key={`bar-${index}`} 
                         style={[
@@ -549,48 +549,48 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar translucent backgroundColor="transparent" />
-      
-      {/* Full-screen preloader */}
-      {(isLoadingLocation || isLoading) && (
-        <View style={styles.absoluteFill}>
-          <LinearGradient
-            colors={['#4c669f', '#3b5998', '#192f6a']}
-            style={styles.background}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
+        <StatusBar translucent backgroundColor="transparent" />
+        
+        {/* Full-screen preloader */}
+        {(isLoadingLocation || isLoading) && (
+          <View style={styles.absoluteFill}>
+            <LinearGradient
+              colors={['#4c669f', '#3b5998', '#192f6a']}
+              style={styles.background}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
             <AnimatedPreloader/>
-          </LinearGradient>
-        </View>
-      )}
-      
-      {/* Main content */}
-      {!(isLoadingLocation || isLoading) && (
-        <>
-          <LinearGradient
-            colors={currentGradient.colors}
-            style={styles.background}
-            start={currentGradient.start}
-            end={currentGradient.end}
-          />
-          
-          {nextGradient && (
-            <Animated.View style={[styles.background, {
-              opacity: fadeAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [1, 0]
-              })
-            }]}>
-              <LinearGradient
-                colors={nextGradient.colors}
-                style={styles.background}
-                start={nextGradient.start}
-                end={nextGradient.end}
-              />
-            </Animated.View>
-          )}
-          
+            </LinearGradient>
+          </View>
+        )}
+        
+        {/* Main content */}
+        {!(isLoadingLocation || isLoading) && (
+          <>
+            <LinearGradient
+              colors={currentGradient.colors}
+              style={styles.background}
+              start={currentGradient.start}
+              end={currentGradient.end}
+            />
+            
+            {nextGradient && (
+              <Animated.View style={[styles.background, {
+                opacity: fadeAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [1, 0]
+                })
+              }]}>
+                <LinearGradient
+                  colors={nextGradient.colors}
+                  style={styles.background}
+                  start={nextGradient.start}
+                  end={nextGradient.end}
+                />
+              </Animated.View>
+            )}
+            
           <ScrollView 
             style={styles.scrollView}
             contentContainerStyle={styles.scrollContent}
@@ -617,16 +617,10 @@ const Home = () => {
               {/* Day/Night Illustration */}
               <View style={styles.illustrationContainer}>
                 {isDayTime ? (
-                  <>
-                    <Image
-                      source={require('../assets/sun.png')}
-                      style={styles.sun}
-                    />
-                    <Image
-                      source={require('../assets/tree.png')}
-                      style={styles.trees}
-                    />
-                  </>
+                  <Image
+                    source={require('../assets/sun.png')}
+                    style={styles.sun}
+                  />
                 ) : (
                   <>
                     <Animated.View
@@ -661,7 +655,7 @@ const Home = () => {
                 )}
               </View>
               
-              <CurrentWeather city={selectedCity} />
+              <CurrentWeather city={selectedCity} isDayTime={isDayTime} />
               
               {renderHourlyForecast()}
               
@@ -678,11 +672,11 @@ const Home = () => {
               </View>
             </View>
           </ScrollView>
-        </>
-      )}
-
+          </>
+        )}
+      
       {renderForecastDetails()}
-    </View>
+      </View>
   );
 };
 
@@ -780,6 +774,13 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
+  sun: {
+    width: 100,
+    height: 100,
+    position: 'absolute',
+    top: 10,
+    zIndex: 1,
+  },
   moonContainer: {
     position: 'absolute',
     top: 10,
@@ -790,24 +791,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     zIndex: 0,
   },
-  sun: {
-    width: 60,
-    height: 60,
-    position: 'absolute',
-    top: 10,
-    zIndex: 1,
-  },
   moon: {
     width: 60,
     height: 60,
     zIndex: 0,
-  },
-  trees: {
-    width: 180,
-    height: 90,
-    position: 'absolute',
-    bottom: 0,
-    zIndex: 1,
   },
   tent: {
     width: 100,
