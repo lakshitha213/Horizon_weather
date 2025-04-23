@@ -9,7 +9,6 @@ const CurrentWeather = ({ city, isDayTime }) => {
   const [weatherData, setWeatherData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const moonAnim = new Animated.Value(0);
 
   const apiKey = 'c1347ee59c0c794deef2405e7fd251eb';
   
@@ -19,22 +18,6 @@ const CurrentWeather = ({ city, isDayTime }) => {
       fetchWeather(city);
     }
   }, [city]);
-
-  useEffect(() => {
-    if (!isDayTime) {
-      moonAnim.setValue(0);
-      Animated.sequence([
-        Animated.delay(500),
-        Animated.timing(moonAnim, {
-          toValue: 1,
-          duration: 5000,
-          useNativeDriver: true,
-        })
-      ]).start();
-    } else {
-      moonAnim.setValue(0);
-    }
-  }, [isDayTime]);
 
   const fetchWeather = async (city) => {
     setIsLoading(true);
@@ -67,41 +50,14 @@ const CurrentWeather = ({ city, isDayTime }) => {
       {error && <Text style={styles.error}>{error}</Text>}
       {weatherData && (
         <View style={styles.weatherInfo}>
-          <Text style={styles.cityName}>{weatherData.name}</Text>
-          
-          <View style={styles.tempContainer}>
+          <View style={styles.headerContainer}>
             <View style={styles.illustrationContainer}>
-              {isDayTime ? (
-                <Image
-                  source={require('../assets/sun.png')}
-                  style={styles.sun}
-                />
-              ) : (
+              {!isDayTime && (
                 <>
-                  <Animated.View
-                    style={[
-                      styles.moonContainer,
-                      {
-                        transform: [
-                          {
-                            translateY: moonAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [200, 0]
-                            })
-                          }
-                        ],
-                        opacity: moonAnim.interpolate({
-                          inputRange: [0, 0.5, 1],
-                          outputRange: [0, 0.8, 1]
-                        })
-                      }
-                    ]}
-                  >
-                    <Image
-                      source={require('../assets/moon.png')}
-                      style={styles.moon}
-                    />
-                  </Animated.View>
+                  <Image
+                    source={require('../assets/moon.png')}
+                    style={styles.moon}
+                  />
                   <Image
                     source={require('../assets/tent.png')}
                     style={styles.tent}
@@ -109,7 +65,10 @@ const CurrentWeather = ({ city, isDayTime }) => {
                 </>
               )}
             </View>
-            <Text style={styles.temp}>{Math.round(weatherData.main.temp)}°C</Text>
+            <View style={styles.textContainer}>
+              <Text style={styles.cityName}>{weatherData.name}</Text>
+              <Text style={styles.temp}>{Math.round(weatherData.main.temp)}°C</Text>
+            </View>
           </View>
 
           <Text style={styles.description}>
@@ -117,7 +76,7 @@ const CurrentWeather = ({ city, isDayTime }) => {
           </Text>
           <Image
             source={{ uri: `https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png` }}
-            style={styles.icon}
+            style={styles.weatherIcon}
           />
           
           <View style={styles.detailsContainer}>
@@ -147,16 +106,16 @@ const CurrentWeather = ({ city, isDayTime }) => {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    marginTop: 20,
-    marginHorizontal: 20,       // Equal left/right spacing
-    width: '90%',              // Slightly less than full width
-    backgroundColor: 'gray', // Pleasant light gray
-    borderRadius: 20,          // Rounded corners
-    padding: 20,               // Internal spacing
-    alignSelf: 'center',       // Horizontal centering
-    borderWidth: 2,            // Optional subtle border
-    borderColor: '#e0e0e0',    // Light border color
-    shadowColor: '#000',       // Subtle shadow
+    marginTop: 0,           // Remove top margin
+    marginHorizontal: 20,   // Keep horizontal margins
+    width: '90%',          // Keep width
+    backgroundColor: 'gray',
+    borderRadius: 20,
+    padding: 15,           // Reduce padding
+    alignSelf: 'center',
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 5,
@@ -169,56 +128,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
-  cityName: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
-    width: '100%',
-  },
-  tempContainer: {
+  headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 15,
     width: '100%',
+    marginBottom: 10,
   },
   illustrationContainer: {
     width: 100,
     height: 100,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 20,
-  },
-  sun: {
-    width: 80,
-    height: 80,
-    zIndex: 1,
-  },
-  moonContainer: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 0,
+    position: 'relative',
+    marginRight: 15,
   },
   moon: {
     width: 60,
     height: 60,
-    zIndex: 0,
+    position: 'absolute',
+    top: 0,
   },
   tent: {
     width: 80,
     height: 60,
     position: 'absolute',
     bottom: 0,
-    zIndex: 2,
+  },
+  textContainer: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  cityName: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
   temp: {
     fontSize: 50,
     color: '#ff8c00',
-    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  tempContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 5,
   },
   description: {
     fontSize: 18,
@@ -256,6 +211,11 @@ const styles = StyleSheet.create({
   color: '#333',
   flex: 1,
   fontWeight: 'bold', 
+  },
+  weatherIcon: {
+    width: 80,
+    height: 80,
+    marginRight: 15,
   },
 });
 

@@ -614,46 +614,7 @@ const Home = () => {
                 </Text>
               </View>
 
-              {/* Day/Night Illustration */}
-              <View style={styles.illustrationContainer}>
-                {isDayTime ? (
-                  <Image
-                    source={require('../assets/sun.png')}
-                    style={styles.sun}
-                  />
-                ) : (
-                  <>
-                    <Animated.View
-                      style={[
-                        styles.moonContainer,
-                        {
-                          transform: [
-                            {
-                              translateY: moonAnim.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [200, 0]
-                              })
-                            }
-                          ],
-                          opacity: moonAnim.interpolate({
-                            inputRange: [0, 0.5, 1],
-                            outputRange: [0, 0.8, 1]
-                          })
-                        }
-                      ]}
-                    >
-                      <Image
-                        source={require('../assets/moon.png')}
-                        style={styles.moon}
-                      />
-                    </Animated.View>
-                    <Image
-                      source={require('../assets/tent.png')}
-                      style={styles.tent}
-                    />
-                  </>
-                )}
-              </View>
+              
               
               <CurrentWeather city={selectedCity} isDayTime={isDayTime} />
               
@@ -773,35 +734,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     position: 'relative',
     overflow: 'hidden',
-  },
-  sun: {
-    width: 100,
-    height: 100,
-    position: 'absolute',
-    top: 10,
-    zIndex: 1,
-  },
-  moonContainer: {
-    position: 'absolute',
-    top: 10,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    zIndex: 0,
-  },
-  moon: {
-    width: 60,
-    height: 60,
-    zIndex: 0,
-  },
-  tent: {
-    width: 100,
-    height: 80,
-    position: 'absolute',
-    bottom: 0,
-    zIndex: 2,
   },
   timeIndicator: {
     marginTop: 10,
