@@ -100,7 +100,6 @@ const styles = StyleSheet.create({
     padding: 10,
     position: 'relative',
     zIndex: 1000,
-    marginTop: 0,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -129,11 +128,10 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     position: 'absolute',
-    top: 60,
+    top: 160,  // Position right below the search bar
     left: 10,
     right: 10,
     backgroundColor: 'white',
-    marginTop: 0,
     borderRadius: 10,
     maxHeight: 300,
     zIndex: 1000,

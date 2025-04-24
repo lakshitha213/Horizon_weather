@@ -52,7 +52,12 @@ const CurrentWeather = ({ city, isDayTime }) => {
         <View style={styles.weatherInfo}>
           <View style={styles.headerContainer}>
             <View style={styles.illustrationContainer}>
-              {!isDayTime && (
+              {isDayTime ? (
+                <Image
+                  source={require('../assets/sun.png')}
+                  style={styles.sun}
+                />
+              ) : (
                 <>
                   <Image
                     source={require('../assets/moon.png')}
@@ -105,24 +110,12 @@ const CurrentWeather = ({ city, isDayTime }) => {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    marginTop: 0,           // Remove top margin
-    marginHorizontal: 20,   // Keep horizontal margins
-    width: '90%',          // Keep width
-    backgroundColor: 'gray',
-    borderRadius: 20,
-    padding: 15,           // Reduce padding
+    marginTop: 20,
+    width: '90%',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 15,
+    padding: 15,
     alignSelf: 'center',
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   weatherInfo: {
     alignItems: 'center',
@@ -133,7 +126,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    marginBottom: 10,
+    marginBottom: 15,
   },
   illustrationContainer: {
     width: 100,
@@ -142,6 +135,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
     marginRight: 15,
+  },
+  sun: {
+    width: 60,
+    height: 60,
+    position: 'absolute',
+    top: 0,
   },
   moon: {
     width: 60,
@@ -160,40 +159,36 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   cityName: {
+    color: '#fff',
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 5,
   },
   temp: {
+    color: '#fff',
     fontSize: 50,
-    color: '#ff8c00',
-    marginBottom: 5,
-  },
-  tempContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    fontWeight: 'bold',
     marginBottom: 5,
   },
   description: {
+    color: '#fff',
     fontSize: 18,
-    color: '#555',
     marginBottom: 15,
     textTransform: 'capitalize',
+    textAlign: 'center',
   },
-  icon: {
-    width: 100,
-    height: 100,
-    alignItems:'center' ,
+  weatherIcon: {
+    width: 80,
+    height: 80,
     marginBottom: 20,
   },
   error: {
-    color: 'red',
+    color: '#fff',
     marginBottom: 20,
   },
   detailsContainer: {
     width: '100%',
-    paddingHorizontal: 80,
+    paddingHorizontal: 20,
   },
   detailRow: {
     flexDirection: 'row',
@@ -202,20 +197,15 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   iconStyle: {
-    width: 30,  // Fixed width for consistent alignment
+    width: 30,
     textAlign: 'center',
   },
   detailText: {
+    color: '#fff',
     fontSize: 16,
-  marginLeft: 10,
-  color: '#333',
-  flex: 1,
-  fontWeight: 'bold', 
-  },
-  weatherIcon: {
-    width: 80,
-    height: 80,
-    marginRight: 15,
+    marginLeft: 10,
+    flex: 1,
+    fontWeight: 'bold',
   },
 });
 

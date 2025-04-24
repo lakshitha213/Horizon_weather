@@ -215,6 +215,7 @@ const Home = () => {
   const handleCitySelect = async (cityName) => {
     setIsLoading(true);
     setSelectedCity(cityName);
+    setSearch(''); // Clear the search input
     Keyboard.dismiss();
     
     try {
@@ -305,7 +306,11 @@ const Home = () => {
           </View>
         </View>
 
-        <View style={styles.rainTable}>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.rainTable}
+        >
           {rainfall.map((rain, index) => (
             <View key={index} style={styles.rainRow}>
               <Text style={styles.rainTime}>{rain.time}</Text>
@@ -328,7 +333,7 @@ const Home = () => {
               </View>
             </View>
           ))}
-        </View>
+        </ScrollView>
       </View>
     );
   };
@@ -339,8 +344,8 @@ const Home = () => {
 
     return (
       <>
-        <View style={styles.hourlyContainer}>
-          <Text style={styles.hourlyTitle}>
+        <View style={styles.hourlyForecastContainer}>
+          <Text style={styles.hourlyForecastTitle}>
             {hourlyForecast[0]?.weather[0]?.main}. Low {data.lowestTemp}°C • High {data.highestTemp}°C
           </Text>
           
@@ -606,15 +611,13 @@ const Home = () => {
                 onChangeText={setSearch}
                 onCitySelect={handleCitySelect}
               />
-
+              
               {/* Day/Night Time Indicator */}
               <View style={styles.timeIndicator}>
                 <Text style={styles.timeText}>
                   {isDayTime ? 'Day Time' : 'Night Time'}
                 </Text>
               </View>
-
-              
               
               <CurrentWeather city={selectedCity} isDayTime={isDayTime} />
               
@@ -623,13 +626,33 @@ const Home = () => {
               {/* 7-Day Forecast Section */}
               <View style={styles.forecastContainer}>
                 <Text style={styles.forecastTitle}>7-Day Forecast</Text>
-                <FlatList
-                  data={forecastData?.list?.filter((_, index) => index % 8 === 0).slice(0, 7)}
-                  horizontal
+                <ScrollView 
+                  horizontal 
                   showsHorizontalScrollIndicator={false}
-                  keyExtractor={(item) => item.dt.toString()}
-                  renderItem={renderForecastItem}
-                />
+                  contentContainerStyle={styles.forecastList}
+                >
+                  {forecastData?.list?.filter((_, index) => index % 8 === 0).slice(0, 7).map((item, index) => (
+                    <TouchableOpacity 
+                      key={index}
+                      style={styles.forecastItem}
+                      onPress={() => {
+                        setSelectedForecast(item);
+                        setModalVisible(true);
+                      }}
+                    >
+                      <Text style={styles.forecastDay}>
+                        {new Date(item.dt * 1000).toLocaleDateString('en-US', { weekday: 'short' })}
+                      </Text>
+                      <Image
+                        source={{ uri: `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png` }}
+                        style={styles.forecastIcon}
+                      />
+                      <Text style={styles.forecastTemp}>
+                        {Math.round(item.main.temp)}°C
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
               </View>
             </View>
           </ScrollView>
@@ -659,34 +682,46 @@ const styles = StyleSheet.create({
   forecastContainer: {
     marginTop: 20,
     marginBottom: 20,
+    width: '90%',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 15,
+    padding: 15,
+    alignSelf: 'center',
   },
   forecastTitle: {
+    color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 10,
+    marginBottom: 15,
     textAlign: 'center',
   },
+  forecastList: {
+    flexDirection: 'row',
+    paddingHorizontal: 5,
+    gap: 10,
+  },
   forecastItem: {
+    width: 100,
     alignItems: 'center',
-    marginRight: 15,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     padding: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 10,
-    minWidth: 80,
+    marginRight: 10,
   },
   forecastDay: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+    marginBottom: 5,
   },
   forecastIcon: {
     width: 50,
     height: 50,
+    marginBottom: 5,
   },
   forecastTemp: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   background: {
@@ -741,9 +776,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timeText: {
-    fontSize: 18,
-    fontWeight: 'bold',
     color: '#fff',
+    fontSize: 14,
+    width: 60,
+    textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
@@ -796,21 +832,70 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000',
   },
-  hourlyContainer: {
+  hourlyForecastContainer: {
     marginTop: 20,
-    marginBottom: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 20,
-    padding: 30,
+    width: '90%',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 15,
+    padding: 15,
+    alignSelf: 'center',
   },
-  hourlyTitle: {
+  hourlyForecastTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  hourlyForecastItem: {
+    alignItems: 'center',
+    marginRight: 15,
+    padding: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+  },
+  hourlyTime: {
+    color: '#fff',
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  hourlyTemp: {
+    color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  rainDetailsContainer: {
+    marginTop: 20,
+    width: '90%',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 15,
+    padding: 15,
+    alignSelf: 'center',
+  },
+  rainDetailsTitle: {
     color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
     marginBottom: 15,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 10,
+    textAlign: 'center',
+  },
+  rainDetailsItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    padding: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+  },
+  rainTime: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  rainIntensity: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   hourlyScrollContent: {
     paddingHorizontal: 10,
@@ -825,15 +910,6 @@ const styles = StyleSheet.create({
     gap: 0,
     paddingHorizontal: 10,
   },
-  timeText: {
-    color: '#fff',
-    fontSize: 12,
-    width: 60,
-    textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 10,
-  },
   iconContainer: {
     width: 60,
     alignItems: 'center',
@@ -844,7 +920,7 @@ const styles = StyleSheet.create({
   },
   tempText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     width: 60,
     textAlign: 'center',
@@ -902,12 +978,6 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
   },
-  rainDetailsContainer: {
-    marginTop: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 20,
-    padding: 30,
-  },
   rainHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -923,45 +993,43 @@ const styles = StyleSheet.create({
     textShadowRadius: 10,
   },
   rainTable: {
-    gap: 10,
+    flexDirection: 'row',
+    paddingHorizontal: 5,
+    gap: 8,
   },
   rainRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 15,
-  },
-  rainTime: {
-    color: '#fff',
-    fontSize: 14,
-    width: 80,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 10,
+    width: 120,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 3,
+    padding: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 6,
   },
   rainAmountContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    height: 24,
+    width: '100%',
+    flexDirection: 'column',
+    gap: 3,
   },
   rainBar: {
-    height: '100%',
-    backgroundColor: 'rgba(30, 144, 255, 0.6)',
-    borderRadius: 4,
+    height: 12,
+    borderRadius: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
   },
   rainAmount: {
     color: '#fff',
-    fontSize: 14,
-    minWidth: 65,
+    fontSize: 11,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
+  },
+  intensityText: {
+    fontSize: 11,
+    fontWeight: 'bold',
   },
   intensityLegend: {
     marginBottom: 15,
@@ -983,14 +1051,6 @@ const styles = StyleSheet.create({
   legendText: {
     color: '#fff',
     fontSize: 12,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: -1, height: 1 },
-    textShadowRadius: 10,
-  },
-  intensityText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    minWidth: 70,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10,
